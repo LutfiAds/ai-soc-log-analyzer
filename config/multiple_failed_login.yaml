@@ -1,0 +1,13 @@
+title: Multiple Failed SSH Logins
+description: Detect multiple failed SSH login attempts from same IP
+logsource:
+  product: linux
+  service: sshd
+
+detection:
+  selection:
+    event: FAILED_LOGIN
+
+  condition: selection
+
+level: high

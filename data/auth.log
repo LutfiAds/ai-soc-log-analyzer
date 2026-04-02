@@ -1,0 +1,7 @@
+Jul 10 10:15:32 webserverajah01 sshd[1234]: Failed password for root from 192.168.1.10 port 22 ssh2
+Jul 10 10:16:01 server sshd[1235]: Accepted password for user from 10.0.0.5 port 22 ssh2
+Jul 10 10:16:45 webserverajah01 sshd[1236]: Failed password for admin from 192.168.1.10 port 22 ssh2
+Jul 10 10:17:12 server sshd[1237]: Failed password for root from 192.168.1.11 port 22 ssh2
+Jul 10 10:18:01 server sshd[1238]: Failed password for root from 8.8.8.8 port 22 ssh2
+Jul 10 10:18:22 server sshd[1239]: Failed password for root from 203.0.113.5 port 22 ssh2
+Jul 10 10:18:45 server sshd[1240]: Failed password for admin from 45.33.32.156 port 22 ssh2

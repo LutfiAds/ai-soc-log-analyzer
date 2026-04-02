@@ -1,11 +1,25 @@
 def assign_risk_score(df):
+
     df = df.copy()
 
+    if "bruteforce_alert" not in df.columns:
+        df["bruteforce_alert"] = "NONE"
+
+    if "trusted_network" not in df.columns:
+        df["trusted_network"] = False
+
     def score(row):
-        if row["anomaly"] == "SUSPICIOUS":
+
+        if row["bruteforce_alert"] == "BRUTEFORCE":
             return "HIGH"
-        else:
-            return "LOW"
+
+        if row["anomaly"] == "SUSPICIOUS" and not row["trusted_network"]:
+            return "HIGH"
+
+        if row["anomaly"] == "SUSPICIOUS":
+            return "MEDIUM"
+
+        return "LOW"
 
     df["risk_level"] = df.apply(score, axis=1)
 

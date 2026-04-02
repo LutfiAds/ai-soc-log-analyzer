@@ -6,7 +6,7 @@ def parse_auth_log(file_path):
     data = []
 
     pattern = re.compile(
-        r'(\w+\s+\d+\s+\d+:\d+:\d+).*Failed password for (\w+) from ([\d\.]+)'
+        r'(\w+\s+\d+\s+\d+:\d+:\d+)\s+(\S+).*Failed password for (\w+) from ([\d\.]+)'
     )
 
     with open(file_path, "r") as file:
@@ -15,12 +15,16 @@ def parse_auth_log(file_path):
 
             if match:
                 timestamp = match.group(1)
-                user = match.group(2)
-                ip = match.group(3)
+                hostname = match.group(2)
+                user = match.group(3)
+                ip = match.group(4)
 
-                data.append([timestamp, user, ip, "FAILED_LOGIN"])
+                data.append([timestamp, hostname, user, ip, "FAILED_LOGIN"])
 
-    df = pd.DataFrame(data, columns=["timestamp", "user", "ip", "event"])
+    df = pd.DataFrame(
+        data,
+        columns=["timestamp", "hostname", "user", "ip", "event"]
+    )
 
     df["timestamp"] = pd.to_datetime(df["timestamp"], format="%b %d %H:%M:%S")
 

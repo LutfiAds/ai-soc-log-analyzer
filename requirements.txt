@@ -4,3 +4,4 @@ scikit-learn
 streamlit
 pyyaml
 matplotlib
+geoip2

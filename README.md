@@ -1,22 +1,27 @@
 # AI SOC Log Analyzer
 
-AI-powered security log analyzer for Linux authentication monitoring.
+AI-powered authentication monitoring detection engine inspired by modern SIEM pipelines.
 
-This project implements a lightweight hybrid detection pipeline inspired by modern SIEM architectures. It analyzes SSH authentication logs (`auth.log`) and detects suspicious behavior using anomaly detection, rule-based detection (Sigma), correlation logic, and severity scoring.
+This project analyzes Linux SSH authentication logs (`auth.log`) and detects suspicious login activity using a hybrid detection strategy combining anomaly detection, rule-based detection, correlation logic, and threat intelligence enrichment.
 
-Designed as a detection-engineering portfolio project and prototype SOC authentication monitoring module.
+Designed as a detection engineering portfolio project simulating a lightweight SIEM authentication analytics preprocessing module.
 
 ---
 
 # Features
 
-- Log parsing for Linux SSH authentication events
-- Anomaly detection using IsolationForest
+## Core Detection Capabilities
+
+- SSH failed login detection
+- IsolationForest anomaly detection
 - Sigma rule-based detection engine
-- Brute-force correlation detection logic
-- Severity scoring system (LOW / HIGH)
-- Streamlit dashboard visualization
-- Modular detection pipeline architecture
+- Brute-force correlation detection
+- Hostname-aware log parsing
+- Trusted subnet classification
+- GeoIP country enrichment
+- High-risk country detection
+- Context-aware severity scoring
+- Streamlit SOC-style dashboard
 
 ---
 
@@ -27,53 +32,87 @@ Log ingestion
     ↓
 Parsing engine
     ↓
-Structured dataframe (pandas)
+Hostname enrichment
+    ↓
+Trusted subnet awareness
+    ↓
+GeoIP enrichment
+    ↓
+High-risk country detection
     ↓
 Anomaly detection (IsolationForest)
     ↓
 Sigma rule detection
     ↓
-Correlation engine (bruteforce detection)
+Brute-force correlation engine
     ↓
-Risk scoring engine
+Severity scoring engine
     ↓
 Dashboard visualization
 ```
 
-This architecture mirrors the detection workflow used in modern SIEM platforms.
+This pipeline mirrors authentication analytics workflows used in SIEM platforms such as Splunk, Elastic SIEM, and Wazuh.
 
 ---
 
-# Example Detection Capabilities
+# Example Detection Scenarios
 
-### Failed SSH login detection
-
-Detects repeated authentication failures:
+### Failed SSH login
 
 ```
 Failed password for root from 192.168.1.10
+```
+
+Result:
+
+```
+SIGMA_ALERT
+Severity: LOW
 ```
 
 ---
 
 ### Brute-force detection
 
-Detects multiple failed login attempts from the same IP:
-
 ```
 FAILED_LOGIN × 3
-→ BRUTEFORCE ALERT
+```
+
+Result:
+
+```
+BRUTEFORCE_ALERT
+Severity: CRITICAL
 ```
 
 ---
 
-### Anomalous login detection
-
-Flags unusual login sources compared to baseline behavior:
+### Suspicious external login
 
 ```
-internal subnet → normal
-external IP → suspicious
+Login attempt from unknown external IP
+```
+
+Result:
+
+```
+ANOMALY_DETECTED
+Severity: HIGH
+```
+
+---
+
+### High-risk country login
+
+```
+Login attempt from high-risk country
+```
+
+Result:
+
+```
+THREAT_INTEL_ALERT
+Severity: HIGH
 ```
 
 ---
@@ -86,8 +125,45 @@ Python | Detection engine core |
 Pandas | Structured log processing |
 Scikit-learn | IsolationForest anomaly detection |
 Sigma Rules | Rule-based detection |
-Streamlit | Dashboard visualization |
+GeoLite2 | GeoIP enrichment |
 YAML | Detection configuration |
+Streamlit | Dashboard visualization |
+
+---
+
+# Installation
+
+Clone repository:
+
+```
+git clone https://github.com/LutfiAds/ai-soc-log-analyzer.git
+cd ai-soc-log-analyzer
+```
+
+Create virtual environment:
+
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```
+pip install -r requirements.txt
+```
+
+Download GeoIP database:
+
+```
+./scripts/download_geoip.sh
+```
+
+Run dashboard:
+
+```
+streamlit run dashboard/app.py
+```
 
 ---
 
@@ -97,21 +173,12 @@ YAML | Detection configuration |
 ai-soc-log-analyzer/
 │
 ├── parser/
-│   └── log_parser.py
-│
 ├── detection/
-│   ├── anomaly_detector.py
-│   ├── sigma_rules_engine.py
-│   └── bruteforce_detector.py
-│
 ├── scoring/
-│   └── risk_score.py
-│
 ├── dashboard/
-│   └── app.py
-│
 ├── config/
-│   └── multiple_failed_login.yaml
+├── scripts/
+│   └── download_geoip.sh
 │
 ├── main.py
 └── requirements.txt
@@ -119,70 +186,13 @@ ai-soc-log-analyzer/
 
 ---
 
-# Example Workflow
-
-Example authentication logs:
-
-```
-Failed password for root from 192.168.1.10
-Failed password for root from 192.168.1.10
-Failed password for root from 192.168.1.10
-```
-
-Detection output:
-
-```
-SIGMA_ALERT
-BRUTEFORCE_ALERT
-Severity: HIGH
-```
-
----
-
-# Real-World Use Cases
-
-This system can be integrated into:
-
-- Linux SSH monitoring pipelines
-- SOC authentication monitoring workflows
-- Security lab environments
-- Detection engineering research prototypes
-- SIEM preprocessing layers
-
-Example enterprise scenario:
-
-```
-Multiple Linux servers
-        ↓
-Log forwarder (Filebeat / rsyslog)
-        ↓
-Detection engine (this project)
-        ↓
-SIEM / Dashboard
-```
-
----
-
-# Future Improvements
-
-Planned enhancements:
-
-- GeoIP enrichment detection
-- Trusted subnet awareness
-- UEBA-style behavior profiling
-- MITRE ATT&CK technique mapping
-- JSON alert export for SIEM integration
-- Dockerized deployment architecture
-
----
-
 # Detection Strategy
 
-This project combines three detection layers:
+This system combines multiple detection layers:
 
-### 1. Anomaly Detection
+### Anomaly Detection
 
-Detects unusual login behavior using machine learning:
+Detects unusual authentication behavior:
 
 ```
 IsolationForest
@@ -190,9 +200,9 @@ IsolationForest
 
 ---
 
-### 2. Rule-Based Detection
+### Rule-Based Detection
 
-Detects suspicious authentication patterns using Sigma rules:
+Detects suspicious authentication events:
 
 ```
 FAILED_LOGIN
@@ -202,7 +212,7 @@ SUDO_EXECUTION
 
 ---
 
-### 3. Correlation Engine
+### Correlation Engine
 
 Detects behavioral attack patterns:
 
@@ -213,22 +223,35 @@ FAILED_LOGIN × N
 
 ---
 
-# Severity Scoring Logic
+### Context Enrichment
 
-Severity levels are assigned based on combined signals:
+Reduces false positives using trusted subnet classification.
 
-| Condition | Severity |
-|----------|----------|
-Single failed login | LOW |
-Anomalous login behavior | HIGH |
-Repeated failed logins | HIGH |
-Brute-force pattern detected | HIGH |
+---
+
+### Threat Intelligence Enrichment
+
+Improves detection accuracy using:
+
+```
+GeoIP lookup
+High-risk country classification
+```
+
+---
+
+# Release History
+
+| Version | Description |
+|--------|-------------|
+v0.1 | Initial anomaly + Sigma detection engine |
+v0.2 | Context-aware detection with trusted subnet enrichment |
+v0.3 | Threat intelligence enriched detection pipeline |
 
 ---
 
 # Author
 
-Developed as a detection engineering portfolio project focused on hybrid SIEM-style authentication monitoring.
+Detection engineering portfolio project by:
 
-GitHub:
 https://github.com/LutfiAds

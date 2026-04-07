@@ -2,6 +2,9 @@ def assign_risk_score(df):
 
     df = df.copy()
 
+    if "cross_host_attack" not in df.columns:
+        df["cross_host_attack"] = False
+
     if "bruteforce_alert" not in df.columns:
         df["bruteforce_alert"] = "NONE"
 
@@ -12,6 +15,9 @@ def assign_risk_score(df):
         df["high_risk_country"] = False
 
     def score(row):
+
+        if row["cross_host_attack"]:
+            return "CRITICAL"
 
         if row["bruteforce_alert"] == "BRUTEFORCE":
             return "CRITICAL"

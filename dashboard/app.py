@@ -12,10 +12,12 @@ from detection.bruteforce_detector import detect_bruteforce
 from detection.geoip_enrichment import enrich_geoip
 from detection.threat_intel import apply_country_risk
 from scoring.risk_score import assign_risk_score
+from ingestion.multi_host_loader import load_multiple_auth_logs
+from correlation.cross_host_detector import detect_cross_host_attack
 
 st.title("AI SOC Log Analyzer Dashboard")
 
-df = parse_auth_log("data/auth.log")
+df = load_multiple_auth_logs("data/")
 
 df = apply_network_context(
     df,
@@ -40,6 +42,8 @@ df = apply_sigma_rules(
 )
 
 df = detect_bruteforce(df)
+
+df = detect_cross_host_attack(df)
 
 df = assign_risk_score(df)
 

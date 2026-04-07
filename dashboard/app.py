@@ -14,6 +14,7 @@ from detection.threat_intel import apply_country_risk
 from scoring.risk_score import assign_risk_score
 from ingestion.multi_host_loader import load_multiple_auth_logs
 from correlation.cross_host_detector import detect_cross_host_attack
+from classification.alert_classifier import classify_alerts
 
 st.title("AI SOC Log Analyzer Dashboard")
 
@@ -44,6 +45,8 @@ df = apply_sigma_rules(
 df = detect_bruteforce(df)
 
 df = detect_cross_host_attack(df)
+
+df = classify_alerts(df)
 
 df = assign_risk_score(df)
 

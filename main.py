@@ -8,6 +8,7 @@ from detection.geoip_enrichment import enrich_geoip
 from detection.threat_intel import apply_country_risk
 from ingestion.multi_host_loader import load_multiple_auth_logs
 from correlation.cross_host_detector import detect_cross_host_attack
+from classification.alert_classifier import classify_alerts
 
 df = load_multiple_auth_logs("data/")
 
@@ -36,6 +37,8 @@ df = apply_sigma_rules(
 df = detect_bruteforce(df)
 
 df = detect_cross_host_attack(df)
+
+df = classify_alerts(df)
 
 df = assign_risk_score(df)
 

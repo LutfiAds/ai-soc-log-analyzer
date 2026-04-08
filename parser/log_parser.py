@@ -46,7 +46,6 @@ def parse_auth_log(file_path):
         columns=["timestamp", "hostname", "user", "ip", "event"]
     )
 
-    # Tambahkan tahun sekarang (karena auth.log tidak punya year)
     current_year = datetime.now().year
 
     df["timestamp"] = pd.to_datetime(

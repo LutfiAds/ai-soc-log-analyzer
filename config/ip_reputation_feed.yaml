@@ -1,0 +1,5 @@
+malicious_ips:
+  - 185.220.101.4
+
+suspicious_ips:
+  - 45.33.32.156

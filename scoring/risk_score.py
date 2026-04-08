@@ -16,6 +16,9 @@ def assign_risk_score(df):
 
     def score(row):
 
+        if row.get("rule_severity"):
+            return row["rule_severity"]
+
         if row["cross_host_attack"]:
             return "CRITICAL"
 
@@ -27,6 +30,12 @@ def assign_risk_score(df):
 
         if row.get("event") == "SUCCESS_LOGIN" and not row.get("trusted_network", True):
             return "SUSPICIOUS_SUCCESSFUL_LOGIN"
+
+        if row.get("ip_reputation") == "MALICIOUS":
+            return "CRITICAL"
+
+        if row.get("ip_reputation") == "SUSPICIOUS":
+            return "HIGH"
 
         if row["anomaly"] == "SUSPICIOUS" and not row["trusted_network"]:
             return "HIGH"

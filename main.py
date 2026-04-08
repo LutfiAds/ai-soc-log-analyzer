@@ -1,4 +1,5 @@
 import argparse
+import time
 
 from parser.log_parser import parse_auth_log
 from detection.anomaly_detector import detect_anomalies
@@ -13,6 +14,8 @@ from correlation.cross_host_detector import detect_cross_host_attack
 from classification.alert_classifier import classify_alerts
 from exporter.json_exporter import export_alerts_to_json
 from mapping.mitre_mapper import map_mitre_techniques
+from enrichment.ip_reputation import apply_ip_reputation
+from detection.rule_engine import apply_detection_rules
 
 parser = argparse.ArgumentParser()
 
@@ -22,43 +25,63 @@ parser.add_argument(
     help="Run detection pipeline and export alerts"
 )
 
+parser.add_argument(
+    "--interval",
+    type=int,
+    help="Run pipeline continously every X seconds"
+)
+
 args = parser.parse_args()
 
-df = load_multiple_auth_logs("data/")
+def run_pipeline():
 
-df = apply_network_context(
-    df,
-    "config/trusted_networks.yaml"
-)
+    df = load_multiple_auth_logs("data/")
 
-df = enrich_geoip(
-    df,
-    "config/GeoLite2-City.mmdb"
-)
+    df = apply_network_context(df, "config/trusted_networks.yaml")
 
-df = apply_country_risk(
-    df,
-    "config/high_risk_countries.yaml"
-)
+    df = enrich_geoip(df, "config/GeoLite2-City.mmdb")
 
-df = detect_anomalies(df)
+    df = apply_ip_reputation(df, "config/ip_reputation_feed.yaml")
 
-df = apply_sigma_rules(
-    df,
-    "config/multiple_failed_login.yaml"
-)
+    df = apply_country_risk(df, "config/high_risk_countries.yaml")
 
-df = detect_bruteforce(df)
+    df = detect_anomalies(df)
 
-df = detect_cross_host_attack(df)
+    df = apply_sigma_rules(df, "config/multiple_failed_login.yaml")
 
-df = classify_alerts(df)
+    df = detect_bruteforce(df)
 
-df = map_mitre_techniques(df)
+    df = detect_cross_host_attack(df)
 
-df = assign_risk_score(df)
+    df = classify_alerts(df)
 
-if args.export:
-    export_alerts_to_json(df)
+    df = map_mitre_techniques(df)
 
-print(df)
+    df = apply_detection_rules(df, "config/detection_rules.yaml")
+
+    df = assign_risk_score(df)
+
+    return df
+
+if args.interval:
+
+    print(f"[+] Scheduler mode active (interval={args.interval}s)")
+
+    while True:
+
+        df = run_pipeline()
+
+        if args.export:
+            export_alerts_to_json(df)
+
+        time.sleep(args.interval)
+
+else:
+
+    df = run_pipeline()
+
+    if args.export:
+        export_alerts_to_json(df)
+
+    else:
+        print(df)

@@ -1,0 +1,17 @@
+rules:
+
+  - name: suspicious_successful_login
+    conditions:
+      event: SUCCESS_LOGIN
+      trusted_network: false
+    severity: HIGH
+
+  - name: malicious_ip_detected
+    conditions:
+      ip_reputation: MALICIOUS
+    severity: CRITICAL
+
+  - name: suspicious_ip_detected
+    conditions:
+      ip_reputation: SUSPICIOUS
+    severity: HIGH

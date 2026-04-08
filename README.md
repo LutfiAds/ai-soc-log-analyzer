@@ -1,165 +1,214 @@
 # AI SOC Log Analyzer
 
-AI-powered authentication monitoring detection engine inspired by modern SIEM pipelines.
-
-This project analyzes Linux SSH authentication logs (`auth.log`) and detects suspicious login activity using a hybrid detection strategy combining anomaly detection, rule-based detection, correlation logic, and threat intelligence enrichment.
-
-Designed as a detection engineering portfolio project simulating a lightweight SIEM authentication analytics preprocessing module.
+Lightweight Authentication Threat Detection Platform for Linux SSH Monitoring
+Detection engineering pipeline with enrichment, correlation, MITRE ATT&CK mapping, and SIEM-compatible alert export.
 
 ---
 
-# Features
+## Overview
 
-## Core Detection Capabilities
+AI SOC Log Analyzer is a modular authentication threat detection pipeline designed to simulate real-world SOC detection workflows.
 
-- SSH failed login detection
-- IsolationForest anomaly detection
-- Sigma rule-based detection engine
-- Brute-force correlation detection
-- Hostname-aware log parsing
-- Trusted subnet classification
-- GeoIP country enrichment
-- High-risk country detection
-- Context-aware severity scoring
-- Streamlit SOC-style dashboard
+The system ingests authentication logs from multiple Linux hosts, enriches them with threat intelligence context, detects suspicious behavior patterns, correlates attack activity across infrastructure, and exports structured alerts compatible with SIEM ingestion pipelines.
+
+This project demonstrates how detection engineering pipelines operate internally inside modern SOC environments.
 
 ---
 
-# Detection Pipeline Architecture
+## Detection Capabilities
 
-```
-Log ingestion
-    ↓
-Parsing engine
-    ↓
-Hostname enrichment
-    ↓
-Trusted subnet awareness
-    ↓
-GeoIP enrichment
-    ↓
-High-risk country detection
-    ↓
-Anomaly detection (IsolationForest)
-    ↓
-Sigma rule detection
-    ↓
-Brute-force correlation engine
-    ↓
-Severity scoring engine
-    ↓
-Dashboard visualization
-```
+The pipeline detects:
 
-This pipeline mirrors authentication analytics workflows used in SIEM platforms such as Splunk, Elastic SIEM, and Wazuh.
+* brute-force login attempts
+* distributed password spraying campaigns
+* suspicious successful logins from external networks
+* authentication anomalies using machine learning
+* high-risk country login attempts
+* malicious IP reputation matches
+* cross-host attack correlation patterns
 
 ---
 
-# Example Detection Scenarios
-
-### Failed SSH login
+## Detection Pipeline Architecture
 
 ```
-Failed password for root from 192.168.1.10
-```
-
-Result:
-
-```
-SIGMA_ALERT
-Severity: LOW
+multi-host ingestion
+→ parsing
+→ trusted subnet awareness
+→ GeoIP enrichment
+→ IP reputation enrichment
+→ country risk classification
+→ anomaly detection (IsolationForest)
+→ sigma rule detection
+→ brute-force detection
+→ cross-host correlation
+→ successful login anomaly detection
+→ MITRE ATT&CK mapping
+→ YAML rule-engine severity overrides
+→ ECS-compatible alert export
+→ Streamlit dashboard visualization
+→ scheduled execution mode
 ```
 
 ---
 
-### Brute-force detection
+## Features
+
+### Multi-host ingestion
+
+Supports simultaneous authentication log ingestion from multiple Linux servers.
+
+Example:
 
 ```
-FAILED_LOGIN × 3
-```
-
-Result:
-
-```
-BRUTEFORCE_ALERT
-Severity: CRITICAL
-```
-
----
-
-### Suspicious external login
-
-```
-Login attempt from unknown external IP
-```
-
-Result:
-
-```
-ANOMALY_DETECTED
-Severity: HIGH
+data/
+ ├── bastion_auth.log
+ ├── web01_auth.log
+ └── db01_auth.log
 ```
 
 ---
 
-### High-risk country login
+### GeoIP enrichment
+
+Adds country-level context to login source IP addresses using GeoLite2.
+
+Example:
 
 ```
-Login attempt from high-risk country
-```
-
-Result:
-
-```
-THREAT_INTEL_ALERT
-Severity: HIGH
+185.220.101.4 → Germany
 ```
 
 ---
 
-# Technology Stack
+### IP reputation enrichment
 
-| Component | Purpose |
-|----------|---------|
-Python | Detection engine core |
-Pandas | Structured log processing |
-Scikit-learn | IsolationForest anomaly detection |
-Sigma Rules | Rule-based detection |
-GeoLite2 | GeoIP enrichment |
-YAML | Detection configuration |
-Streamlit | Dashboard visualization |
+Matches login IP addresses against configurable threat intelligence feeds.
+
+Example:
+
+```
+ip_reputation = MALICIOUS
+```
 
 ---
 
-# Installation
+### Country risk classification
 
-Clone repository:
+Flags authentication attempts originating from high-risk geographic regions.
 
-```
-git clone https://github.com/LutfiAds/ai-soc-log-analyzer.git
-cd ai-soc-log-analyzer
-```
+---
 
-Create virtual environment:
+### Machine learning anomaly detection
 
-```
-python3 -m venv venv
-source venv/bin/activate
-```
+IsolationForest identifies abnormal authentication behavior patterns automatically.
 
-Install dependencies:
+---
 
-```
-pip install -r requirements.txt
-```
+### Sigma-style detection rules
 
-Download GeoIP database:
+Detects authentication attack patterns using configurable detection signatures.
+
+Example:
 
 ```
-./scripts/download_geoip.sh
+multiple_failed_login.yaml
 ```
 
-Run dashboard:
+---
+
+### Cross-host correlation engine
+
+Identifies distributed attack campaigns targeting multiple servers simultaneously.
+
+Example:
+
+```
+same IP attacking bastion + web01 + db01
+```
+
+---
+
+### Suspicious successful login detection
+
+Detects credential compromise indicators when authentication succeeds from external networks.
+
+Mapped to:
+
+```
+MITRE ATT&CK T1078
+Persistence
+```
+
+---
+
+### MITRE ATT&CK mapping
+
+Each detection event is mapped to:
+
+* technique ID
+* tactic classification
+
+Examples:
+
+```
+T1110 Credential Access
+T1078 Persistence
+```
+
+---
+
+### YAML-based detection rule engine
+
+Detection logic can be modified without editing Python code.
+
+Example:
+
+```
+config/detection_rules.yaml
+```
+
+---
+
+### ECS-compatible alert export
+
+Exports structured detection events compatible with:
+
+* Elastic Security
+* Splunk
+* Microsoft Sentinel
+* QRadar ingestion pipelines
+
+Example output:
+
+```
+source.ip
+host.name
+event.category
+event.outcome
+threat.technique.id
+event.severity
+```
+
+---
+
+### Scheduler mode
+
+Runs detection pipeline continuously at configurable intervals.
+
+Example:
+
+```
+python main.py --export --interval 300
+```
+
+---
+
+### Streamlit dashboard
+
+Interactive visualization of authentication alerts and threat activity.
+
+Launch dashboard:
 
 ```
 streamlit run dashboard/app.py
@@ -167,91 +216,118 @@ streamlit run dashboard/app.py
 
 ---
 
-# Project Structure
+## Example Detection Output
 
 ```
-ai-soc-log-analyzer/
-│
-├── parser/
-├── detection/
-├── scoring/
-├── dashboard/
-├── config/
-├── scripts/
-│   └── download_geoip.sh
-│
-├── main.py
-└── requirements.txt
-```
-
----
-
-# Detection Strategy
-
-This system combines multiple detection layers:
-
-### Anomaly Detection
-
-Detects unusual authentication behavior:
-
-```
-IsolationForest
+{
+  "@timestamp": "2026-07-10 10:25:01",
+  "event.category": "authentication",
+  "event.outcome": "failure",
+  "host.name": "bastion",
+  "source.ip": "185.220.101.4",
+  "ip_reputation": "MALICIOUS",
+  "threat.technique.id": "T1110",
+  "threat.tactic.name": "Credential Access",
+  "event.severity": "CRITICAL"
+}
 ```
 
 ---
 
-### Rule-Based Detection
-
-Detects suspicious authentication events:
+## Project Structure
 
 ```
-FAILED_LOGIN
-ROOT_LOGIN
-SUDO_EXECUTION
-```
-
----
-
-### Correlation Engine
-
-Detects behavioral attack patterns:
-
-```
-FAILED_LOGIN × N
-→ BRUTEFORCE ATTACK
+parser/
+detection/
+classification/
+scoring/
+mapping/
+enrichment/
+exporter/
+dashboard/
+config/
+data/
+alerts/
 ```
 
 ---
 
-### Context Enrichment
+## Use Cases
 
-Reduces false positives using trusted subnet classification.
+This project simulates detection workflows used by:
+
+* Security Operations Centers (SOC)
+* Detection Engineers
+* Threat Hunters
+* Blue Team analysts
+* SIEM pipeline developers
+
+Typical applications include:
+
+* SSH brute-force monitoring
+* credential compromise detection
+* infrastructure attack correlation
+* authentication anomaly detection
+* SIEM enrichment pipeline prototyping
 
 ---
 
-### Threat Intelligence Enrichment
+## Requirements
 
-Improves detection accuracy using:
+Python 3.10+
+
+Install dependencies:
 
 ```
-GeoIP lookup
-High-risk country classification
+pip install -r requirements.txt
 ```
 
 ---
 
-# Release History
+## Run Detection Pipeline
 
-| Version | Description |
-|--------|-------------|
-v0.1 | Initial anomaly + Sigma detection engine |
-v0.2 | Context-aware detection with trusted subnet enrichment |
-v0.3 | Threat intelligence enriched detection pipeline |
+Single execution:
+
+```
+python main.py --export
+```
+
+Continuous monitoring mode:
+
+```
+python main.py --export --interval 60
+```
 
 ---
 
-# Author
+## Dashboard
 
-Detection engineering portfolio project by:
+Start visualization interface:
 
-https://github.com/LutfiAds
+```
+streamlit run dashboard/app.py
+```
+
+---
+
+## Roadmap
+
+Completed:
+
+* multi-host ingestion
+* GeoIP enrichment
+* IP reputation feeds
+* anomaly detection engine
+* sigma detection rules
+* correlation engine
+* MITRE ATT&CK mapping
+* YAML detection rule system
+* ECS-compatible export schema
+* scheduler runtime mode
+
+Future improvements:
+
+* external threat intelligence API integration
+* container authentication monitoring support
+* Windows event log support
+* real-time log streaming ingestion

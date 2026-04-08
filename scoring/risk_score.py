@@ -25,6 +25,9 @@ def assign_risk_score(df):
         if row["high_risk_country"]:
             return "HIGH"
 
+        if row.get("event") == "SUCCESS_LOGIN" and not row.get("trusted_network", True):
+            return "SUSPICIOUS_SUCCESSFUL_LOGIN"
+
         if row["anomaly"] == "SUSPICIOUS" and not row["trusted_network"]:
             return "HIGH"
 

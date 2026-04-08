@@ -12,10 +12,14 @@ def parse_auth_log(file_path):
     r'(\w+\s+\d+\s+\d+:\d+:\d+)\s+(\S+).*Failed password for (?:invalid user )?(\w+) from ([\d\.]+)'
     )
 
+    success_pattern = re.compile(
+    r'(\w+\s+\d+\s+\d+:\d+:\d+)\s+(\S+).*Accepted password for (\w+) from ([\d\.]+)'
+    )
+
     with open(file_path, "r") as file:
         for line in file:
             match = pattern.search(line)
-
+            success_match = success_pattern.search(line)
             if match:
                 timestamp = match.group(1)
                 hostname = match.group(2)
@@ -29,6 +33,13 @@ def parse_auth_log(file_path):
                     ip,
                     "FAILED_LOGIN"
                 ])
+            if success_match:
+                timestamp = success_match.group(1)
+                hostname = success_match.group(2)
+                user = success_match.group(3)
+                ip = success_match.group(4)
+
+                data.append([timestamp, hostname, user, ip, "SUCCESS_LOGIN"])
 
     df = pd.DataFrame(
         data,

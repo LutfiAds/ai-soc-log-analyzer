@@ -24,6 +24,8 @@ def export_alerts_to_json(df, output_path="alerts/alerts.json"):
         "ip",
         "country",
         "alert_type",
+        "mitre_attack_technique",
+        "mitre_attack_tactic",
         "risk_level",
         "export_timestamp"
     ]

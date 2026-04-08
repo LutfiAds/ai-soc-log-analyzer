@@ -12,6 +12,7 @@ from ingestion.multi_host_loader import load_multiple_auth_logs
 from correlation.cross_host_detector import detect_cross_host_attack
 from classification.alert_classifier import classify_alerts
 from exporter.json_exporter import export_alerts_to_json
+from mapping.mitre_mapper import map_mitre_techniques
 
 parser = argparse.ArgumentParser()
 
@@ -52,6 +53,8 @@ df = detect_bruteforce(df)
 df = detect_cross_host_attack(df)
 
 df = classify_alerts(df)
+
+df = map_mitre_techniques(df)
 
 df = assign_risk_score(df)
 

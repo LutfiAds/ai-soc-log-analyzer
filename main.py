@@ -1,3 +1,5 @@
+import argparse
+
 from parser.log_parser import parse_auth_log
 from detection.anomaly_detector import detect_anomalies
 from scoring.risk_score import assign_risk_score
@@ -9,6 +11,17 @@ from detection.threat_intel import apply_country_risk
 from ingestion.multi_host_loader import load_multiple_auth_logs
 from correlation.cross_host_detector import detect_cross_host_attack
 from classification.alert_classifier import classify_alerts
+from exporter.json_exporter import export_alerts_to_json
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "--export",
+    action="store_true",
+    help="Run detection pipeline and export alerts"
+)
+
+args = parser.parse_args()
 
 df = load_multiple_auth_logs("data/")
 
@@ -41,5 +54,8 @@ df = detect_cross_host_attack(df)
 df = classify_alerts(df)
 
 df = assign_risk_score(df)
+
+if args.export:
+    export_alerts_to_json(df)
 
 print(df)
